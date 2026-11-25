@@ -273,14 +273,79 @@ def stack_message_passing_layers(node_features, src, dst, layers, edge_attr=None
          intermediate_outputs.append(current_features)
     return current_features,intermediate_outputs
 
-# Step 14 - gcn_renormalize_adjacency (not yet solved)
-# TODO: implement
+# Step 14 - gcn_renormalize_adjacency
+def gcn_renormalize_adjacency(src, dst, num_nodes,edge_weight=None):
+    """Apply Kipf-Welling renormalization: self-loops then symmetric norm.
 
-# Step 15 - gcn_linear_transform (not yet solved)
-# TODO: implement
+    Args:
+        src: LongTensor [E] source node indices.
+        dst: LongTensor [E] destination node indices.
+        num_nodes: int, number of nodes N.
 
-# Step 16 - gcn_layer_forward (not yet solved)
-# TODO: implement
+    Returns:
+        src_hat: LongTensor [E + N] sources after self-loops.
+        dst_hat: LongTensor [E + N] destinations after self-loops.
+        norm_weight: FloatTensor [E + N] symmetrically normalized weights.
+    """
+    # TODO: add self-loops then symmetrically normalize the adjacency...
+    
+    src_aug,dst_aug=add_self_loops(src,dst,num_nodes)
+    weights_norm=symmetric_normalize_edge_weights(src_aug,dst_aug,num_nodes,edge_weight)
+
+    return  src_aug,dst_aug,weights_norm
+
+# Step 15 - gcn_linear_transform
+def gcn_linear_transform(node_features, weight, bias=None):
+    """Apply the GCN linear feature transform X @ W (+ bias).
+
+    Args:
+        node_features: FloatTensor of shape (N, Fin).
+        weight: FloatTensor of shape (Fin, Fout).
+        bias: optional FloatTensor of shape (Fout).
+
+    Returns:
+        FloatTensor of shape (N, Fout).
+    """
+    # TODO: compute the matrix product and optionally add a bias vector
+
+    out=node_features@weight
+    if bias is not None:
+        out=out+bias
+
+    return out
+
+# Step 16 - gcn_layer_forward
+def gcn_layer_forward(node_features, src, dst, weight, bias=None, num_nodes=None, activation=None):
+    """Forward pass of one GCN layer: renormalize, transform, propagate.
+
+    Args:
+        node_features: FloatTensor of shape (N, Fin).
+        src: LongTensor of shape (E,) source indices.
+        dst: LongTensor of shape (E,) destination indices.
+        weight: FloatTensor of shape (Fin, Fout).
+        bias: optional FloatTensor of shape (Fout,).
+        num_nodes: optional int N; defaults to node_features.shape[0].
+        activation: optional callable applied to the output.
+
+    Returns:
+        FloatTensor of shape (N, Fout).
+    """
+    # TODO: Forward pass of one GCN layer: renormalize, transform, propagate...
+    if num_nodes is None:
+        num_nodes=node_features.shape[0]
+    # 归一化邻接矩阵
+    src_new,dst_new,norm_weights=gcn_renormalize_adjacency(src,dst,num_nodes)
+    # 线性变换
+    transformed_features=gcn_linear_transform(node_features,weight,bias)
+    # 提取节点特征
+    src_feats=gather_source_node_features(transformed_features,src_new)
+    # 乘以归一化权重
+    weight_feats=src_feats*norm_weights.unsqueeze(1)
+    
+    agg_features=scatter_sum_to_nodes(weight_feats,dst_new,num_nodes)
+    if activation is not None:
+          agg_features=activation(agg_features)
+    return agg_features
 
 # Step 17 - init_gcn_parameters (not yet solved)
 # TODO: implement
