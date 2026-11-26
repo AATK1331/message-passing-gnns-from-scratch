@@ -527,14 +527,13 @@ def gat_layer_forward(node_features, src, dst, head_params, merge_mode='concat',
     # TODO: run each head, merge outputs, apply optional nonlinearity...
     head_outputs=[]
     all_attn=[]
-    
+    if num_nodes is None:
+           num_nodes=node_features.shape[0]
     for params in head_params:
         weight=params['weight']
         attn_dst=params['attn_dst']
         attn_src=params['attn_src']
         bias=params.get('bias',None)
-        if num_nodes is None:
-           num_nodes=node_features.shape[0]
         output_head,attn_head=gat_head_forward(node_features,src,dst,weight,attn_src,attn_dst,bias,num_nodes)
         head_outputs.append(output_head)
         all_attn.append(attn_head)
