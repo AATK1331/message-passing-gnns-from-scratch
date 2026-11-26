@@ -422,8 +422,30 @@ def gat_attention_logits(node_features, src, dst, attn_src, attn_dst, weight):
     result=F.leaky_relu(attn_src@H_src.T+attn_dst@H_dst.T,negative_slope=0.2)
     return result,H
 
-# Step 20 - gat_masked_neighbor_softmax (not yet solved)
-# TODO: implement
+# Step 20 - gat_masked_neighbor_softmax
+def gat_masked_neighbor_softmax(logits, dst, num_nodes):
+    """Numerically stable softmax of attention logits over each dest node's neighbors.
+
+    Args:
+        logits: FloatTensor of shape (E,) with one unnormalized attention logit per edge.
+        dst: LongTensor of shape (E,) with destination node index for each edge.
+        num_nodes: int, number of nodes N in the graph.
+
+    Returns:
+        FloatTensor of shape (E,) with attention coefficients that sum to 1 over
+        each destination's incoming edges.
+    """
+    # TODO: Numerically stable softmax of attention logits over each dest node's neighbors
+
+    logits_2d=logits.unsqueeze(1)
+    max_per_node=scatter_max_to_nodes(logits_2d,dst,num_nodes)
+    max_per_edge=max_per_node[dst]
+    exp_logits=torch.exp(logits_2d-max_per_edge)
+    sum_per_node=scatter_sum_to_nodes(exp_logits,dst,num_nodes)
+    sum_per_edge=sum_per_node[dst]
+    alpha=(exp_logits/sum_per_edge).squeeze(1)
+
+    return alpha
 
 # Step 21 - gat_head_forward (not yet solved)
 # TODO: implement
