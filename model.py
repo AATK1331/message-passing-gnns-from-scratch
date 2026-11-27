@@ -829,8 +829,12 @@ def accuracy_metric(logits, targets):
          
     return accuracy.item()
 
-# Step 40 - mae_metric (not yet solved)
-# TODO: implement
+# Step 40 - mae_metric
+def mae_metric(predictions, targets):
+    # TODO: Compute mean absolute error between predicted and target continuous values.
+    loss=predictions.view(-1)-targets.view(-1)
+    result=torch.mean(torch.abs(loss))
+    return result.item()
 
 # Step 41 - gnn_train_step (not yet solved)
 # TODO: implement
