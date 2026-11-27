@@ -658,8 +658,18 @@ def global_sum_pool(node_features, batch_index, num_graphs=None):
    
     return sum_features
 
-# Step 28 - global_max_pool (not yet solved)
-# TODO: implement
+# Step 28 - global_max_pool
+def global_max_pool(node_features, batch_index, num_graphs=None):
+    # TODO: Globally max-pool node features into one graph-level vector per graph.
+    if num_graphs is None:
+       B=int(batch_index.max())+1
+
+    else:
+        B=num_graphs
+
+    max_nodes=scatter_max_to_nodes(node_features,batch_index,B)
+    
+    return max_nodes
 
 # Step 29 - global_mean_max_pool (not yet solved)
 # TODO: implement
