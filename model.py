@@ -799,8 +799,17 @@ def generate_molecule_like_graph(num_nodes, num_node_features, edge_prob=0.3, se
 # Step 36 - collate_graph_batch (not yet solved)
 # TODO: implement
 
-# Step 37 - cross_entropy_loss (not yet solved)
-# TODO: implement
+# Step 37 - cross_entropy_loss
+import torch.nn.functional as F
+
+def cross_entropy_loss(logits, targets):
+    # TODO: Compute mean multi-class cross-entropy between logits and targets.
+    log_probs=F.log_softmax(logits,dim=1)
+    
+    M=logits.shape[0]
+    target_log_probs=log_probs[torch.arange(M),targets]
+
+    return  -target_log_probs.mean()
 
 # Step 38 - mse_loss (not yet solved)
 # TODO: implement
