@@ -836,8 +836,30 @@ def mae_metric(predictions, targets):
     result=torch.mean(torch.abs(loss))
     return result.item()
 
-# Step 41 - gnn_train_step (not yet solved)
-# TODO: implement
+# Step 41 - gnn_train_step
+def gnn_train_step(params, batch, forward_fn, loss_fn, lr):
+    # TODO: Run one SGD training step and update params in-place...
+    predictions=forward_fn(params,batch)
+    targets=batch['y']
+    loss=loss_fn(predictions,targets)
+    
+    for param in params.values():
+        if param.grad is not None:
+            param.grad.zero_()
+
+
+    loss.backward()
+    with torch.no_grad():
+       for param in params.values():
+           param-=lr*param.grad
+    
+    return {
+        'loss':loss.item(),
+        'params':params
+    }
+    
+
+    1
 
 # Step 42 - train_node_classifier (not yet solved)
 # TODO: implement
