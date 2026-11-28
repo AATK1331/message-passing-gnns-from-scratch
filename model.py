@@ -899,8 +899,32 @@ def gnn_train_step(params, batch, forward_fn, loss_fn, lr):
 
     1
 
-# Step 42 - train_node_classifier (not yet solved)
-# TODO: implement
+# Step 42 - train_node_classifier
+def train_node_classifier(params, dataset, forward_fn, num_epochs, lr, mask_key='train_mask'):
+    # TODO: Train a functional node-classification GNN for several epochs on a masked graph
+    history=[]
+    mask=dataset[mask_key]
+    targets=dataset['y']
+    for epoch in  range(num_epochs):
+          logits=forward_fn(params,dataset['x'],dataset['edge_index'])
+          masked_logits=logits[mask]
+          masked_targets=targets[mask]
+          curracy_value=accuracy_metric(masked_logits,masked_targets)
+          loss=cross_entropy_loss(masked_logits,masked_targets)
+          history.append({'loss':loss.item(),'accuracy':curracy_value})
+          for param in params.values():
+              if param.grad is not None:
+                   param.grad.zero_()
+
+          loss.backward()
+          with torch.no_grad():
+                for param in params.values():
+                    param-=lr*param.grad
+          
+    return {
+        'params':params,
+        'history':history
+    }
 
 # Step 43 - train_graph_regressor (not yet solved)
 # TODO: implement
