@@ -926,8 +926,44 @@ def train_node_classifier(params, dataset, forward_fn, num_epochs, lr, mask_key=
         'history':history
     }
 
-# Step 43 - train_graph_regressor (not yet solved)
-# TODO: implement
+# Step 43 - train_graph_regressor
+def train_graph_regressor(params, graphs, forward_fn, num_epochs, lr, batch_size=8):
+    """Train a graph regressor over multiple epochs of mini-batches.
+
+    Args:
+        params: dict of trainable torch tensors.
+        graphs: list of graph dicts with keys x, edge_index, y.
+        forward_fn: callable(params, batch) -> predictions.
+        num_epochs: number of training epochs.
+        lr: learning rate for SGD updates.
+        batch_size: graphs per mini-batch (default 8).
+
+    Returns:
+        history: dict with 'loss' and 'mae' lists of per-epoch floats.
+        params: updated parameter dict.
+    """
+    # TODO: Train a graph regressor over epochs of mini-batches, tracking loss and MAE
+    
+    
+    history={'loss':[],'mae':[]}
+    if not graphs:
+        return (history,params)
+    for epoch in range(num_epochs):
+        epoch_losses=[]
+        for i in range(0,len(graphs),batch_size):
+                batch_graphs=graphs[i:i+batch_size]
+                batch=collate_graph_batch(batch_graphs)
+                step_result=gnn_train_step(params,batch,forward_fn,mse_loss,lr)
+                epoch_losses.append
+        mean_loss=sum(epoch_losses)/max(len(epoch_losses),1)
+
+        with torch.no_grad():
+             full_batch=collate_graph_batch(graphs)
+             prediction=forward_fn(params,full_batch)
+             full_mae=mae_metric(prediction,full_batch['y'])
+        history['loss'].append(mean_loss)
+        history['mae'].append(full_mae)
+    return (history,params)
 
 # Step 44 - representation_similarity
 def representation_similarity(features_a, features_b):
@@ -935,8 +971,23 @@ def representation_similarity(features_a, features_b):
     result=torch.cosine_similarity(features_a,features_b,dim=1,eps=1e-8).mean()
     return result.item()
 
-# Step 45 - oversmoothing_diagnostic (not yet solved)
-# TODO: implement
+# Step 45 - oversmoothing_diagnostic
+def oversmoothing_diagnostic(layer_features):
+    # TODO: Diagnose oversmoothing via consecutive-layer representation similarities.
+    
+    if len(layer_features)<2:
+        return {'pairwise_similarities':[],'mean_similarity':0.0}
+    
+    pairwise_similarities=[]
+    for i in range(len(layer_features)-1):
+        result=representation_similarity(layer_features[i],layer_features[i+1])  
+        pairwise_similarities.append(result)
+    mean_similarity=sum(pairwise_similarities)/len(pairwise_similarities)
+
+    return {
+        'pairwise_similarities':pairwise_similarities,
+        'mean_similarity':mean_similarity
+    }
 
 # Step 46 - mpnn_gnn_experiment (not yet solved)
 # TODO: implement
