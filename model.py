@@ -905,8 +905,11 @@ def gnn_train_step(params, batch, forward_fn, loss_fn, lr):
 # Step 43 - train_graph_regressor (not yet solved)
 # TODO: implement
 
-# Step 44 - representation_similarity (not yet solved)
-# TODO: implement
+# Step 44 - representation_similarity
+def representation_similarity(features_a, features_b):
+    # TODO: Return mean cosine similarity of corresponding rows (eps=1e-8)...
+    result=torch.cosine_similarity(features_a,features_b,dim=1,eps=1e-8).mean()
+    return result.item()
 
 # Step 45 - oversmoothing_diagnostic (not yet solved)
 # TODO: implement
